@@ -1,0 +1,131 @@
+﻿@using SP_ASPNET_1.Models;
+@using Microsoft.AspNet.Identity;
+
+@{ Layout = "~/Views/Shared/Blog/_BlogLayout.cshtml"; }
+
+@if (Model.BlogPosts != null)
+{
+   
+<ul class="Posts__Featured">
+    @foreach (BlogPost post in Model.BlogPosts)
+    {
+    
+<li class="Posts__Item">
+    <img src="@Html.AttributeEncode(SP_ASPNET_1.BusinessLogic.Constants.POST_IMAGE_PREFIX + post.ImageUrl)" alt="post image preview" class="Post__Image">
+    <div class="Post-Preview__Content">
+        <input type="hidden" class="BlogPostID" name="BlogPostID" value="@post.BlogPostID">
+        <h2>@post.Title</h2>
+        <p>By @post.Author on @post.DateTime.ToString(SP_ASPNET_1.BusinessLogic.Constants.DISPLAY_DATETIME_FORMAT)</p>
+
+      
+
+        <br>
+        <p>@post.Content.Substring(0, 200)...</p>
+        <p>
+
+            <span id="@("LoveCount"+post.BlogPostID)" .">
+                @post.BlogPostReactions.Count()
+            </span>
+            @if (post.BlogPostReactions.Where(x => x.BlogPostID == post.BlogPostID && x.UserID == User.Identity.GetUserId()).Any())
+            {
+
+                <span onclick="Reaction(@post.BlogPostID,false)" class="ReactionLove" style="color:red !important">
+                    <i class="fa fa-heart" aria-hidden="true"></i>
+
+                </span>
+            }
+            else
+            {
+                <span onclick="Reaction(@post.BlogPostID,true)" class="ReactionLove">
+                    <i class="fa fa-heart" aria-hidden="true"></i>
+
+                </span>
+            }
+
+
+        </p>
+    </div>
+    <div>
+
+    </div>
+</li>
+                    <li class="Posts__Item__Link">
+                        <button onClick="location.href='@Url.Action("SinglePost", new { id = @post.BlogPostID})'" class="c-btn">read more</button>
+                        <hr class="Post__Hr" />
+
+                    </li>}
+    <li>
+        <button class="c-btn">load more</button>
+    </li>
+
+</ul> }
+else
+{
+<h1>There are no blog posts :-(</h1>}
+<script type="text/javascript">
+    function Reaction(PostID , like) {
+        debugger;
+        var count = $('#LoveCount' + PostID).text();
+        if ($('#LoveCount' + PostID).text() == "0" || $('#LoveCount' + PostID).text() == "" ) {
+            like = true;
+
+        }
+        else {
+            like = false;
+        }
+        var jsonInput = { id: PostID, Like: like };
+                    var url = "@Url.Action("Reaction")";
+            var id = $("#personID").val();
+        $.get(url, { id: PostID, like: like }, function (data) {
+            debugger;
+
+            if (data == -1) {
+                window.location.href = "Authentication/Login";
+
+            }
+            else {
+                $('#LoveCount' + PostID).text(data);
+            }
+
+            
+            });
+        //$.ajax(
+        //    {
+        //        type: 'POST',
+        //        dataType: 'JSON',
+        //        url: "/BlogPost/Reaction",
+        //        data: { jsonInput: JSON.stringify(jsonInput) },
+        //        success:
+        //            function (response) {
+        //                // Generate HTML table.
+        //                convertJsonToHtmlTable(JSON.parse(response), $("#TableId"));
+        //            },
+        //        error:
+        //            function (response) {
+        //                alert("Error: " + response);
+        //            }
+        //    });
+    }
+    //$('.ReactionLove').click(function () {
+    //    debugger;
+    //    var BlogPostID = $("li").find('input.BlogPostID').val();
+    //    var jsonInput = { id: BlogPostID};
+    //    $.ajax(
+    //        {
+    //            type: 'POST',
+    //            dataType: 'JSON',
+    //            url: "/BlogPost/Reaction",
+    //            data: { jsonInput: JSON.stringify(jsonInput) },
+    //            success:
+    //                function (response) {
+    //                    // Generate HTML table.
+    //                    convertJsonToHtmlTable(JSON.parse(response), $("#TableId"));
+    //                },
+    //            error:
+    //                function (response) {
+    //                    alert("Error: " + response);
+    //                }
+    //        });
+    //})
+
+</script>
